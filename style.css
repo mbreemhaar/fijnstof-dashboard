@@ -1,18 +1,26 @@
 body {
     text-align: center;
-    background-color: azure;
+    background: linear-gradient(0deg, #07AEFF 0%, #BEE8FC 100%);
+    padding: 25px;
 }
 
 header {
     margin: 5px;
 }
 
+main {
+    margin: 0 auto;
+    width: fit-content;
+}
+
 .province {
-    background-color: skyblue;
-    margin: 50px;
+    background-color: #A8E5FF;
+    margin-bottom: 25px;
     padding: 10px;
     border: 3px solid;
     border-radius: 15px;
+    box-shadow: 3px 3px 3px;
+    max-width: 1000px;
 }
 
 .municipality {
@@ -22,4 +30,17 @@ header {
     padding: 5px;
     border: 1px solid;
     border-radius: 5px;
+    box-shadow: 3px 3px 3px;
+}
+
+.label {
+    text-align: left;
+}
+
+.observation {
+    text-align: right;
+}
+
+th {
+    text-align: center;
 }
