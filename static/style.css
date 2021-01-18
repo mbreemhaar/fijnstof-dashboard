@@ -1,5 +1,6 @@
 body {
     text-align: center;
+    background: #07AEFF;
     background: linear-gradient(0deg, #07AEFF 0%, #BEE8FC 100%);
     padding: 25px;
 }

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" href="{{ url_for('static',filename='style.css') }}">
+        <title>Fijnstof Dashboard</title>
+    </head>
+    <body>
+        <header>
+            <h1>Fijnstof Dashboard Noord-Nederland</h1>
+            <p>Welkom op het fijnstof dashboard van Noord-Nederland!</p>
+        </header>
+        <main>
+            {% for province in provinces %}
+            <section class="province">
+                <h2>{{ province.name }}</h2>
+                {% for mun in province.municipalities %}
+                <section class="municipality" style="background-color: #0BB5FF;">
+                    <table>
+                        <tr><th colspan="2">{{ mun.name }}</th></tr>
+                        <tr><td class="label">PM2,5</td><td class="observation">{{ mun.pm25 }} &mu;g/m3</td></tr>
+                        <tr><td class="label">PM10</td><td class="observation">{{ mun.pm10 }} &mu;g/m3</td></tr>
+                        <tr><td class="label">Temperatuur</td><td class="observation">{{ mun.temp }}&deg;C</td></tr>
+                        <tr><td class="label">Luchtvochtigheid</td><td class="observation">{{ mun.rh }}%</td></tr>
+                        <tr><td class="label">Sensoren</td><td class="observation">{{ mun.n_sensors }}</td></tr>
+                    </table>
+                </section>
+                {% endfor %}
+            </section>
+            {% endfor %}
+        </main>
+    </body>
+</html>
