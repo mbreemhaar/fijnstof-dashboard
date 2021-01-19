@@ -16,7 +16,7 @@
             <section class="province">
                 <h2>{{ province.name }}</h2>
                 {% for mun in province.municipalities %}
-                <section class="municipality" style="background-color: #0BB5FF;">
+                <section class="municipality" style="background-color: {{ mun.color }};">
                     <table>
                         <tr><th colspan="2">{{ mun.name }}</th></tr>
                         <tr><td class="label">PM2,5</td><td class="observation">{{ mun.pm25 }} &mu;g/m3</td></tr>
