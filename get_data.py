@@ -34,8 +34,16 @@ for code in municipality_codes:
 filter_query = ' or '.join(filter_query_list)
 
 # Retrieve Things filtered by municipality code
+sensors = []
 result = requests.get("https://api-samenmeten.rivm.nl/v1.0/Things?$filter={query}".format(query=filter_query))
-sensors = result.json()['value']
+
+while '@iot.nextLink' in result.json().keys():
+    next_link = result.json()['@iot.nextLink']
+    sensors += result.json()['value']
+    result = requests.get(next_link)
+
+sensors += result.json()['value']
+
 
 df = pd.DataFrame(columns=['name', 'codegemeente', 'latitude', 'longitude', 'date', 'temp', 'rh', 'pm25_kal', 'pm10_kal'])
 
@@ -58,9 +66,12 @@ for s in sensors:
     location_request = requests.get(location_link)
 
     # Extract sensor coordinates
-    coordinates = location_request.json()['value'][0]['location']['coordinates']
-    coordinates.reverse()
-    row_dict['latitude'], row_dict['longitude'] = tuple(coordinates)
+    try:
+        coordinates = location_request.json()['value'][0]['location']['coordinates']
+        coordinates.reverse()
+        row_dict['latitude'], row_dict['longitude'] = tuple(coordinates)
+    except IndexError:
+        continue
 
     # Get datastreams
     datastream_link = s['Datastreams@iot.navigationLink']
