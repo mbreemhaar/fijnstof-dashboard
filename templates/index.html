@@ -12,6 +12,22 @@
             <p>Welkom op het fijnstof dashboard van Noord-Nederland!</p>
         </header>
         <main>
+            <section id="legend">
+                <p>
+                    <div class="legend-element">
+                        <div class="box blue"></div> Goed
+                    </div>
+                    <div class="legend-element">
+                        <div class="box orange"></div> Matig
+                    </div>
+                    <div class="legend-element">
+                        <div class="box red"></div> Slecht
+                    </div>
+                    <div class="legend-element">
+                        <div class="box grey"></div> Geen data bekend
+                    </div>
+                </p>
+            </section>
             {% for province in provinces %}
             <section class="province">
                 <h2>{{ province.name }}</h2>

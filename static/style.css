@@ -21,7 +21,7 @@ main {
     border: 3px solid;
     border-radius: 15px;
     box-shadow: 3px 3px 3px;
-    max-width: 900px;
+    max-width: 1200px;
 }
 
 .municipality {
@@ -49,3 +49,36 @@ table {
 th {
     text-align: center;
 }
+
+#legend {
+    margin: 0 auto;
+}
+
+.legend-element {
+    margin: 0 10px;
+    display: inline-block;
+}
+
+.box {
+    height: 13px;
+    width: 13px;
+    border: 1px solid black;
+    clear: both;
+    display: inline-block;
+  }
+  
+  .blue {
+    background-color: #0BB5FF;
+  }
+  
+  .orange {
+    background-color: #FFAB4A;
+  }
+  
+  .red {
+    background-color: #FF4A5F;
+  }
+
+  .grey {
+      background-color: #989898;
+  }
