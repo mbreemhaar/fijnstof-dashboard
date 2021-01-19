@@ -2,6 +2,7 @@ import pandas as pd
 import os
 import math
 from datetime import datetime
+import requests
 
 def timestamp():
     with open(os.path.join('data', 'datetime.txt')) as f:
@@ -9,9 +10,6 @@ def timestamp():
         stripped = raw.split('.')[0]
         encoded = datetime.strptime(stripped, '%Y-%m-%d %H:%M:%S')
         return encoded.strftime('%d-%m-%Y %H:%M')
-
-
-
 
 def mean_data():
     # Map province codes to sensors
@@ -61,6 +59,13 @@ def mean_data():
         province_data.append({'name': prov_code_name_map[prov_code], 'municipalities': mean_data})
 
     return province_data
+
+def nearest_sensor_data(ip_address):
+    api_data = requests.get('https://ipapi.co/{}/json/'.format(ip_address))
+
+    user_city = api_data.json()['city']
+    user_lat = api_data.json()['latitude']
+    user_long = api_data.json()['longitude']
     
 if __name__ == "__main__":
-    generate_data()
+    print(nearest_sensor_data('82.73.164.165'))
