@@ -1,8 +1,19 @@
 import pandas as pd
 import os
 import math
+from datetime import datetime
 
-def generate_data():
+def timestamp():
+    with open(os.path.join('data', 'datetime.txt')) as f:
+        raw = f.readline()
+        stripped = raw.split('.')[0]
+        encoded = datetime.strptime(stripped, '%Y-%m-%d %H:%M:%S')
+        return encoded.strftime('%d-%m-%Y %H:%M')
+
+
+
+
+def mean_data():
     # Map province codes to sensors
     df = pd.read_csv(os.path.join('data', 'sensors.csv'))
     municipalities = pd.read_csv('gemeenten-alfabetisch-2021.csv')
