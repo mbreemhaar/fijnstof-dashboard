@@ -34,6 +34,15 @@ main {
     width: 250px;
 }
 
+.nearest-sensor {
+    display: inline-block;
+    margin: 5px;
+    padding: 5px;
+    border: 1px solid;
+    border-radius: 5px;
+    box-shadow: 3px 3px 3px;
+}
+
 .label {
     text-align: left;
 }

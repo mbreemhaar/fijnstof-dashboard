@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import os
 import math
 from datetime import datetime
@@ -60,12 +61,47 @@ def mean_data():
 
     return province_data
 
+def distance(user_lat, user_lon, sensor_lat, sensor_lon):
+    return math.sqrt((user_lat - sensor_lat)**2 + (user_lon - sensor_lon)**2)
+
 def nearest_sensor_data(ip_address):
     api_data = requests.get('https://ipapi.co/{}/json/'.format(ip_address))
 
-    user_city = api_data.json()['city']
     user_lat = api_data.json()['latitude']
-    user_long = api_data.json()['longitude']
-    
+    user_lon = api_data.json()['longitude']
+
+    sensor_data = pd.read_csv(os.path.join('data', 'sensors.csv'))
+
+    nearest_idx = 0
+
+    nearest_lat = np.inf
+    nearest_lon = np.inf
+
+    for i in range(len(sensor_data)):
+        sensor_lat = sensor_data['latitude'][i]
+        sensor_lon = sensor_data['longitude'][i]
+
+        if distance(user_lat, user_lon, sensor_lat, sensor_lon) < distance(user_lat, user_lon, nearest_lat, nearest_lon):
+            nearest_idx = i
+            nearest_lat = sensor_lat
+            nearest_lon = sensor_lon
+
+    nearest_sensor = sensor_data.iloc[nearest_idx].to_dict()
+
+    if nearest_sensor['pm10_kal'] >= 40 or nearest_sensor['pm25_kal'] >= 25:
+        nearest_sensor['color'] = '#FF4A5F' # Red
+    elif nearest_sensor['pm10_kal'] >= 20 or nearest_sensor['pm25_kal'] >= 10:
+        nearest_sensor['color'] = '#FFAB4A' # Orange
+    else:
+        nearest_sensor['color'] = '#0BB5FF' # Blue
+
+    municipalities = pd.read_csv('gemeenten-alfabetisch-2021.csv')
+    mun_code_name_map = pd.Series(municipalities.Gemeentenaam.values, index=municipalities.Gemeentecode).to_dict()
+
+    nearest_sensor['municipality'] = mun_code_name_map[nearest_sensor['codegemeente']]
+
+    return nearest_sensor
+
+
 if __name__ == "__main__":
-    print(nearest_sensor_data('82.73.164.165'))
+    pass
