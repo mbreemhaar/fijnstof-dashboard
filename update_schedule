@@ -1,0 +1,2 @@
+0 * * * * python3 /get_data.py
+# This line just serves to make it a valid file

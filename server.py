@@ -9,9 +9,8 @@ app.debug = True
 
 @app.route('/')
 def dashboard():
-    #nearest_sensor = nearest_sensor_data(request.remote_addr)
-    nearest_sensor = nearest_sensor_data('217.21.206.119')
+    nearest_sensor = nearest_sensor_data(request.remote_addr)
     return render_template('index.html', provinces=mean_data(), timestamp=timestamp(), nearest_sensor=nearest_sensor)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True, host='0.0.0.0')
