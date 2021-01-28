@@ -67,8 +67,11 @@ def distance(user_lat, user_lon, sensor_lat, sensor_lon):
 def nearest_sensor_data(ip_address):
     api_data = requests.get('https://ipapi.co/{}/json/'.format(ip_address))
 
-    user_lat = api_data.json()['latitude']
-    user_lon = api_data.json()['longitude']
+    try:
+        user_lat = api_data.json()['latitude']
+        user_lon = api_data.json()['longitude']
+    except KeyError:
+        return {'color': '#989898'}
 
     sensor_data = pd.read_csv(os.path.join('data', 'sensors.csv'))
 
