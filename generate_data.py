@@ -57,8 +57,10 @@ def mean_data():
 
                 mean_data.append(mean_mun_data)
         
+        mean_data = sorted(mean_data, key=lambda k: k['name'])
         province_data.append({'name': prov_code_name_map[prov_code], 'municipalities': mean_data})
 
+    province_data = sorted(province_data, key=lambda k: k['name'])
     return province_data
 
 def distance(user_lat, user_lon, sensor_lat, sensor_lon):
