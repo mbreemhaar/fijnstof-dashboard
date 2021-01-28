@@ -84,6 +84,16 @@ def get_sensor_location(sensor):
 
     return tuple(coordinates)
 
+def is_up_to_date(date_str, hours):
+    date_datetime = datetime.datetime.strptime(date_str, ('%Y-%m-%dT%H:%M:%S.%fZ'))
+    
+    delta = datetime.datetime.now() - date_datetime
+
+    if delta.seconds > 3600 * hours or delta.days > 0:
+        return False
+    else:
+        return True
+
 def get_all_sensor_data(sensor):
     # Initialize dictionary for row
     row_dict = {}
@@ -100,8 +110,11 @@ def get_all_sensor_data(sensor):
     # Add observations to row_dict
     for obs_type in ['temp', 'rh', 'pm25_kal', 'pm10_kal']:
         row_dict = update_observation_dict(row_dict, sensor, obs_type)
-    # Append data to output list
-    return row_dict
+
+    if 'date' in row_dict.keys() and is_up_to_date(row_dict['date'], 3):
+        return row_dict
+    else:
+        return None
 
 def write_timestamp(path, filename):
     # Write date and time to file to show when data was last updated
