@@ -45,11 +45,16 @@ def get_province_municipality_codes(province_code_list):
     filtered_municipalities = municipalities[municipalities.Provinciecode.isin(province_code_list)]
     return filtered_municipalities['Gemeentecode']
 
-def get_sensors_in_municipalities(municipality_code_list):
+def get_sensors_in_municipalities(municipality_code_list, filter_project=None):
     # Generate query filter string for municipalities
     filter_query_list = []
-    for code in municipality_code_list:
-        filter_query_list.append("properties/codegemeente eq '{}'".format(code))
+
+    if filter_project:
+        for code in municipality_code_list:
+            filter_query_list.append("properties/codegemeente eq '{}' and properties/project eq '{}'".format(code, filter_project))
+    else:
+        for code in municipality_code_list:
+            filter_query_list.append("properties/codegemeente eq '{}'".format(code))
 
     filter_query = ' or '.join(filter_query_list)
 
@@ -113,12 +118,12 @@ if __name__ == '__main__':
     municipality_code_list = get_province_municipality_codes([20,21,22])
 
     # Get information of all sensors
-    sensors = get_sensors_in_municipalities(municipality_code_list)
+    sensors = get_sensors_in_municipalities(municipality_code_list, filter_project='Luftdaten')
 
     # Create empty dataframe with appropriate columns
     df = pd.DataFrame(columns=['name', 'codegemeente', 'latitude', 'longitude', 'date', 'temp', 'rh', 'pm25_kal', 'pm10_kal'])
 
-    progress_bar = IncrementalBar('Downloading sensor data...', max=len(sensors), suffix='ETA: %(eta_td)s')
+    progress_bar = IncrementalBar('Downloading sensor data %(index)d of %(max)d', max=len(sensors), suffix='ETA: %(eta_td)s')
     for s in sensors:
         # Append sensor data to dataframe
         df = df.append(get_all_sensor_data(s), ignore_index=True)
