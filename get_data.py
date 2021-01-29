@@ -1,4 +1,5 @@
 import requests
+import pytz
 import pandas as pd
 import sys
 import os
@@ -118,7 +119,7 @@ def get_all_sensor_data(sensor):
 
 def write_timestamp(path, filename):
     # Write date and time to file to show when data was last updated
-    current_date_and_time = str(datetime.datetime.now())
+    current_date_and_time = str(datetime.datetime.now(pytz.timezone('Europe/Amsterdam')))
     with open(os.path.join(path, filename), 'w') as f:
         f.write(current_date_and_time + '\n')
 
