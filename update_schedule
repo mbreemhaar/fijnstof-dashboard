@@ -1,2 +1,1 @@
-0 * * * * python3 /get_data.py
-# This line just serves to make it a valid file
+*/30 * * * * cd / && usr/bin/python3 /get_data.py >> /log.txt
