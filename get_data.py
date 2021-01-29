@@ -45,11 +45,16 @@ def get_province_municipality_codes(province_code_list):
     filtered_municipalities = municipalities[municipalities.Provinciecode.isin(province_code_list)]
     return filtered_municipalities['Gemeentecode']
 
-def get_sensors_in_municipalities(municipality_code_list):
+def get_sensors_in_municipalities(municipality_code_list, filter_project=None):
     # Generate query filter string for municipalities
     filter_query_list = []
-    for code in municipality_code_list:
-        filter_query_list.append("properties/codegemeente eq '{}'".format(code))
+
+    if filter_project:
+        for code in municipality_code_list:
+            filter_query_list.append("properties/codegemeente eq '{}' and properties/project eq '{}'".format(code, filter_project))
+    else:
+        for code in municipality_code_list:
+            filter_query_list.append("properties/codegemeente eq '{}'".format(code))
 
     filter_query = ' or '.join(filter_query_list)
 
@@ -79,6 +84,16 @@ def get_sensor_location(sensor):
 
     return tuple(coordinates)
 
+def is_up_to_date(date_str, hours):
+    date_datetime = datetime.datetime.strptime(date_str, ('%Y-%m-%dT%H:%M:%S.%fZ'))
+    
+    delta = datetime.datetime.now() - date_datetime
+
+    if delta.seconds > 3600 * hours or delta.days > 0:
+        return False
+    else:
+        return True
+
 def get_all_sensor_data(sensor):
     # Initialize dictionary for row
     row_dict = {}
@@ -95,8 +110,11 @@ def get_all_sensor_data(sensor):
     # Add observations to row_dict
     for obs_type in ['temp', 'rh', 'pm25_kal', 'pm10_kal']:
         row_dict = update_observation_dict(row_dict, sensor, obs_type)
-    # Append data to output list
-    return row_dict
+
+    if 'date' in row_dict.keys() and is_up_to_date(row_dict['date'], 3):
+        return row_dict
+    else:
+        return None
 
 def write_timestamp(path, filename):
     # Write date and time to file to show when data was last updated
@@ -113,12 +131,12 @@ if __name__ == '__main__':
     municipality_code_list = get_province_municipality_codes([20,21,22])
 
     # Get information of all sensors
-    sensors = get_sensors_in_municipalities(municipality_code_list)
+    sensors = get_sensors_in_municipalities(municipality_code_list, filter_project='Luftdaten')
 
     # Create empty dataframe with appropriate columns
     df = pd.DataFrame(columns=['name', 'codegemeente', 'latitude', 'longitude', 'date', 'temp', 'rh', 'pm25_kal', 'pm10_kal'])
 
-    progress_bar = IncrementalBar('Downloading sensor data...', max=len(sensors), suffix='ETA: %(eta_td)s')
+    progress_bar = IncrementalBar('Downloading sensor data %(index)d of %(max)d', max=len(sensors), suffix='ETA: %(eta_td)s')
     for s in sensors:
         # Append sensor data to dataframe
         df = df.append(get_all_sensor_data(s), ignore_index=True)
