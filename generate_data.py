@@ -42,10 +42,10 @@ def mean_data(fix_eemsdelta=True):
                 
                 mean_mun_data = {
                     'name': mun_code_name_map[mun_code],
-                    'pm10': round(mun_data['pm10_kal'].mean(), 2),
-                    'pm25': round(mun_data['pm25_kal'].mean(), 2),
-                    'temp': round(mun_data['temp'].mean(), 2),
-                    'rh': round(mun_data['rh'].mean(), 2),
+                    'pm10': mun_data['pm10_kal'].mean(),
+                    'pm25': mun_data['pm25_kal'].mean(),
+                    'temp': mun_data['temp'].mean(),
+                    'rh': mun_data['rh'].mean(),
                     'n_sensors': len(mun_data)
                 }
 
@@ -60,6 +60,10 @@ def mean_data(fix_eemsdelta=True):
                     if type(mean_mun_data[k]) == float and math.isnan(mean_mun_data[k]):
                         mean_mun_data[k] = '--'
                         mean_mun_data['color'] = '#989898' # Light grey
+                    elif k in ['pm10', 'pm25', 'rh']:
+                        mean_mun_data[k] = round(mean_mun_data[k])
+                    elif k in ['temp']:
+                        mean_mun_data[k] = round(mean_mun_data[k], 1)
 
                 mean_data.append(mean_mun_data)
         
@@ -79,7 +83,7 @@ def nearest_sensor_data(ip_address):
         user_lat = api_data.json()['latitude']
         user_lon = api_data.json()['longitude']
     except KeyError:
-        return {'color': '#989898'}
+        return {'municipality': 'Geen','pm10_kal': '--', 'pm25_kal': '--', 'temp': '--', 'rh': '--', 'color': '#989898'}
 
     sensor_data = pd.read_csv(os.path.join('data', 'sensors.csv'))
 
@@ -105,6 +109,15 @@ def nearest_sensor_data(ip_address):
         nearest_sensor['color'] = '#FFAB4A' # Orange
     else:
         nearest_sensor['color'] = '#0BB5FF' # Blue
+
+    for k in nearest_sensor.keys():
+        if type(nearest_sensor[k]) == np.float64 and math.isnan(nearest_sensor[k]):
+                        nearest_sensor[k] = '--'
+        elif k in ['pm10_kal', 'pm25_kal', 'rh']:
+            print(k, type(nearest_sensor[k]))
+            nearest_sensor[k] = round(float(nearest_sensor[k]))
+        elif k in ['temp']:
+            nearest_sensor[k] = round(float(nearest_sensor[k]), 1)
 
     municipalities = pd.read_csv('gemeenten-alfabetisch-2021.csv')
     mun_code_name_map = pd.Series(municipalities.Gemeentenaam.values, index=municipalities.Gemeentecode).to_dict()
