@@ -1,9 +1,11 @@
+from os.path import join
 import pandas as pd
 import numpy as np
 import os
 import math
 from datetime import datetime
 import requests
+import folium
 
 def timestamp():
     with open(os.path.join('data', 'datetime.txt')) as f:
@@ -40,12 +42,14 @@ def mean_data(fix_eemsdelta=True):
                 mun_data = df[df['codegemeente'] == mun_code]
                 
                 mean_mun_data = {
+                    'code': mun_code,
                     'name': mun_code_name_map[mun_code],
                     'pm10': mun_data['pm10_kal'].mean(),
                     'pm25': mun_data['pm25_kal'].mean(),
                     'temp': mun_data['temp'].mean(),
                     'rh': mun_data['rh'].mean(),
-                    'n_sensors': len(mun_data)
+                    'n_sensors': len(mun_data),
+                    'map': generate_municipality_map(mun_code)
                 }
 
                 if mean_mun_data['pm10'] >= 40 or mean_mun_data['pm25'] >= 25:
@@ -125,6 +129,26 @@ def nearest_sensor_data(ip_address):
 
     return nearest_sensor
 
+def generate_municipality_map(municipality_code):
+    df = pd.read_csv(os.path.join('data', 'sensors.csv'))
+    df = df[df['codegemeente'] == municipality_code]
+
+    locations = []
+    for _, row in df.iterrows():
+        l = (row['latitude'], row['longitude'])
+        locations.append(l)
+    
+    m = folium.Map()
+
+    for l in locations:
+        marker = folium.Marker(l)
+        marker.add_to(m)
+
+    sw = df[['latitude', 'longitude']].min().values.tolist()
+    ne = df[['latitude', 'longitude']].max().values.tolist()
+
+    m.fit_bounds([sw, ne])
+    return m.get_root().render()
 
 if __name__ == "__main__":
     pass

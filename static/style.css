@@ -14,6 +14,10 @@ main {
     width: fit-content;
 }
 
+a {
+    color: inherit;
+}
+
 .province {
     background-color: #A8E5FF;
     margin-bottom: 25px;
