@@ -95,7 +95,7 @@ def is_up_to_date(date_str, hours):
     else:
         return True
 
-def get_all_sensor_data(sensor):
+def get_all_sensor_data(sensor, fix_eemsdelta=True):
     # Initialize dictionary for row
     row_dict = {}
 
@@ -104,6 +104,13 @@ def get_all_sensor_data(sensor):
 
     # Gemeentecode
     row_dict['codegemeente'] = sensor['properties']['codegemeente']
+    
+    # New municipality has not been added in RIVM data, so we manually correct for this
+    if fix_eemsdelta:
+        eemsdelta_codes = ['3', '24' ,'10']
+        if row_dict['codegemeente'] in eemsdelta_codes:
+            row_dict['codegemeente'] = '1979'
+
 
     # Location
     row_dict['latitude'], row_dict['longitude'] = get_sensor_location(sensor)
