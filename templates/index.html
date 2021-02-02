@@ -28,6 +28,7 @@
                     </div>
                 </p>
             </section>
+            <a href="/sensorkaart/{{ nearest_sensor.name }}">
             <section class="nearest-sensor" style="background-color: {{ nearest_sensor.color }};">
                 <table>
                     <tr><th colspan="2">Dichtsbijzijnde sensor: {{ nearest_sensor.name }}</th></tr>
@@ -38,6 +39,7 @@
                     <tr><td class="label">Luchtvochtigheid</td><td class="observation">{{ nearest_sensor.rh }}%</td></tr>
                 </table>
             </section>
+            </a>
             {% for province in provinces %}
             <section class="province">
                 <h2>{{ province.name }}</h2>

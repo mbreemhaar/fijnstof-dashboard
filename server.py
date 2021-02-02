@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from generate_data import mean_data, timestamp, nearest_sensor_data, generate_municipality_map
+from generate_data import mean_data, timestamp, nearest_sensor_data, generate_municipality_map, generate_sensor_map
 
 app = Flask(__name__)
 app.debug = True
@@ -12,6 +12,10 @@ def dashboard():
 @app.route('/gemeentekaart/<int:gemeentecode>')
 def render_map(gemeentecode):
     return generate_municipality_map(gemeentecode)
+
+@app.route('/sensorkaart/<name>')
+def render_sensor_map(name):
+    return generate_sensor_map(name)
 
 
 if __name__ == '__main__':

@@ -150,5 +150,15 @@ def generate_municipality_map(municipality_code):
     m.fit_bounds([sw, ne])
     return m.get_root().render()
 
+def generate_sensor_map(name):
+    df = pd.read_csv(os.path.join('data', 'sensors.csv'))
+    row = df.loc[df['name'] == name]
+    latitude = row['latitude']
+    longitude = row['longitude']
+    m = folium.Map((latitude, longitude), zoom_start=30)
+    marker = folium.Marker((latitude, longitude))
+    marker.add_to(m)
+    return m.get_root().render()
+
 if __name__ == "__main__":
     pass
