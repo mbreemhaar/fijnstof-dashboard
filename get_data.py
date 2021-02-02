@@ -1,7 +1,6 @@
 import requests
 import pytz
 import pandas as pd
-import sys
 import os
 import datetime
 from progress.bar import IncrementalBar

@@ -1,7 +1,4 @@
 from flask import Flask, render_template, request
-import pandas as pd
-import os
-
 from generate_data import mean_data, timestamp, nearest_sensor_data
 
 app = Flask(__name__)

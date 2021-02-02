@@ -29,7 +29,6 @@ def mean_data(fix_eemsdelta=True):
     prov_code_name_map = pd.Series(municipalities.Provincienaam.values, index=municipalities.Provinciecode).to_dict()
 
     province_codes = df['codeprovincie'].unique()
-    municipality_codes = df['codegemeente'].unique()
 
     province_data = []
 
