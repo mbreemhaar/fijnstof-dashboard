@@ -76,59 +76,6 @@ def mean_data(fix_eemsdelta=True):
     province_data = sorted(province_data, key=lambda k: k['name'])
     return province_data
 
-def distance(user_lat, user_lon, sensor_lat, sensor_lon):
-    return math.sqrt((user_lat - sensor_lat)**2 + (user_lon - sensor_lon)**2)
-
-def nearest_sensor_data(ip_address):
-    api_data = requests.get('https://ipapi.co/{}/json/'.format(ip_address))
-
-    try:
-        user_lat = api_data.json()['latitude']
-        user_lon = api_data.json()['longitude']
-    except KeyError:
-        return {'municipality': 'Geen','pm10_kal': '--', 'pm25_kal': '--', 'temp': '--', 'rh': '--', 'color': '#989898'}
-
-    sensor_data = pd.read_csv(os.path.join('data', 'sensors.csv'))
-
-    nearest_idx = 0
-
-    nearest_lat = np.inf
-    nearest_lon = np.inf
-
-    for i in range(len(sensor_data)):
-        sensor_lat = sensor_data['latitude'][i]
-        sensor_lon = sensor_data['longitude'][i]
-
-        if distance(user_lat, user_lon, sensor_lat, sensor_lon) < distance(user_lat, user_lon, nearest_lat, nearest_lon):
-            nearest_idx = i
-            nearest_lat = sensor_lat
-            nearest_lon = sensor_lon
-
-    nearest_sensor = sensor_data.iloc[nearest_idx].to_dict()
-
-    if nearest_sensor['pm10_kal'] >= 40 or nearest_sensor['pm25_kal'] >= 25:
-        nearest_sensor['color'] = '#FF4A5F' # Red
-    elif nearest_sensor['pm10_kal'] >= 20 or nearest_sensor['pm25_kal'] >= 10:
-        nearest_sensor['color'] = '#FFAB4A' # Orange
-    else:
-        nearest_sensor['color'] = '#0BB5FF' # Blue
-
-    for k in nearest_sensor.keys():
-        if type(nearest_sensor[k]) == np.float64 and math.isnan(nearest_sensor[k]):
-                        nearest_sensor[k] = '--'
-        elif k in ['pm10_kal', 'pm25_kal', 'rh']:
-            print(k, type(nearest_sensor[k]))
-            nearest_sensor[k] = round(float(nearest_sensor[k]))
-        elif k in ['temp']:
-            nearest_sensor[k] = round(float(nearest_sensor[k]), 1)
-
-    municipalities = pd.read_csv('gemeenten-alfabetisch-2021.csv')
-    mun_code_name_map = pd.Series(municipalities.Gemeentenaam.values, index=municipalities.Gemeentecode).to_dict()
-
-    nearest_sensor['municipality'] = mun_code_name_map[nearest_sensor['codegemeente']]
-
-    return nearest_sensor
-
 def generate_municipality_map(municipality_code):
     df = pd.read_csv(os.path.join('data', 'sensors.csv'))
     df = df[df['codegemeente'] == municipality_code]
@@ -148,16 +95,6 @@ def generate_municipality_map(municipality_code):
     ne = df[['latitude', 'longitude']].max().values.tolist()
 
     m.fit_bounds([sw, ne])
-    return m.get_root().render()
-
-def generate_sensor_map(name):
-    df = pd.read_csv(os.path.join('data', 'sensors.csv'))
-    row = df.loc[df['name'] == name]
-    latitude = row['latitude']
-    longitude = row['longitude']
-    m = folium.Map((latitude, longitude), zoom_start=30)
-    marker = folium.Marker((latitude, longitude))
-    marker.add_to(m)
     return m.get_root().render()
 
 if __name__ == "__main__":
