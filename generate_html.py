@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import numpy as np
 import math
 from datetime import datetime
 import folium
@@ -12,16 +13,33 @@ def timestamp():
         encoded = datetime.strptime(stripped, '%Y-%m-%d %H:%M:%S')
         return encoded.strftime('%d-%m-%Y %H:%M')
 
-def mean_data(fix_eemsdelta=True):
-    # Map province codes to sensors
-    df = pd.read_csv(os.path.join('data', 'sensors.csv'))
+
+def get_municipalities(fix_eemsdelta=True):
     municipalities = pd.read_csv('gemeenten-alfabetisch-2021.csv')
 
     if fix_eemsdelta:
         eemsdelta_codes = [3, 24 ,10]
         municipalities = municipalities[~municipalities['Gemeentecode'].isin(eemsdelta_codes)]
 
-    mun_prov_map = pd.Series(municipalities.Provinciecode.values, index=municipalities.Gemeentecode).to_dict()
+    return municipalities
+
+
+def get_mun_prov_map(fix_eemsdelta=True):
+    municipalities = get_municipalities()
+    return pd.Series(municipalities.Provinciecode.values, index=municipalities.Gemeentecode).to_dict()
+
+
+def get_municipality_codes():
+    df = pd.read_csv(os.path.join('data', 'sensors.csv'))
+    return df['codegemeente'].unique()
+
+
+def mean_data(fix_eemsdelta=True):
+    # Map province codes to sensors
+    df = pd.read_csv(os.path.join('data', 'sensors.csv'))
+    municipalities = get_municipalities()
+    
+    mun_prov_map = get_mun_prov_map()
 
     df['codeprovincie'] = df['codegemeente'].map(mun_prov_map)
 
@@ -78,16 +96,35 @@ def generate_municipality_map(municipality_code):
     df = pd.read_csv(os.path.join('data', 'sensors.csv'))
     df = df[df['codegemeente'] == municipality_code]
 
-    locations = []
-    for _, row in df.iterrows():
-        l = (row['latitude'], row['longitude'])
-        locations.append(l)
-    
     m = folium.Map()
 
-    for l in locations:
-        marker = folium.Marker(l)
+    for _, row in df.iterrows():
+        l = (row['latitude'], row['longitude'])
+
+        if row['pm10_kal'] >= 40 or row['pm25_kal'] >= 25:
+            row['color'] = 'red' # Red
+        elif row['pm10_kal'] >= 20 or row['pm25_kal'] >= 10:
+            row['color'] = 'orange' # Orange
+        else:
+            row['color'] = 'lightblue' # Blue
+
+        for k in row.keys():
+            if type(row[k]) == float and math.isnan(row[k]):
+                            row[k] = '--'
+            elif k in ['pm10_kal', 'pm25_kal', 'rh']:
+                row[k] = round(float(row[k]))
+            elif k in ['temp']:
+                row[k] = round(float(row[k]), 1)
+        
+        text = '''PM2,5: {}&mu;g/m3<br>
+        PM10: {}&mu;g/m3<br>
+        Temperatuur: {}&deg;C<br>
+        Luchtvochtigheid: {}%'''.format(row['pm25_kal'], row['pm10_kal'], row['temp'], row['rh'], )
+        popup = folium.Popup(text, max_width=200)
+        icon = folium.Icon(color=row['color'])
+        marker = folium.Marker(l, popup=popup, icon=icon)
         marker.add_to(m)
+        
 
     sw = df[['latitude', 'longitude']].min().values.tolist()
     ne = df[['latitude', 'longitude']].max().values.tolist()
@@ -95,7 +132,16 @@ def generate_municipality_map(municipality_code):
     m.fit_bounds([sw, ne])
     return m.get_root().render()
 
+def save_municipality_maps(path):
+    os.makedirs(path, exist_ok=True)
+    codes = get_municipality_codes()
+    for c in codes:
+        mun_map = generate_municipality_map(c)
+        with open(os.path.join(path, str(c) + '.html'), 'w') as f:
+            f.write(mun_map)
+
 if __name__ == "__main__":
+    save_municipality_maps(os.path.join('static', 'maps'))
     env = Environment(loader=FileSystemLoader('templates'))
     template = env.get_template('index.html')
     html_code = template.render(provinces=mean_data(), timestamp=timestamp())
