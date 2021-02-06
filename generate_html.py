@@ -5,6 +5,7 @@ import math
 from datetime import datetime
 import folium
 from jinja2 import Environment, FileSystemLoader
+from progress.bar import IncrementalBar
 
 def timestamp():
     with open(os.path.join('data', 'datetime.txt')) as f:
@@ -135,15 +136,22 @@ def generate_municipality_map(municipality_code):
 def save_municipality_maps(path):
     os.makedirs(path, exist_ok=True)
     codes = get_municipality_codes()
+    progress_bar = IncrementalBar('Generating sensor maps %(index)d of %(max)d', max=len(codes), suffix='ETA: %(eta_td)s')
     for c in codes:
         mun_map = generate_municipality_map(c)
         with open(os.path.join(path, str(c) + '.html'), 'w') as f:
             f.write(mun_map)
+        progress_bar.next()
+    progress_bar.finish()
+
+def save_dashboard_html(path, filename='index.html', templates_path='templates', template_name='index.html'):
+    print('Generating {}'.format(filename))
+    env = Environment(loader=FileSystemLoader(templates_path))
+    template = env.get_template(template_name)
+    html_code = template.render(provinces=mean_data(), timestamp=timestamp())
+    with open(os.path.join(path, filename), 'w') as f:
+        f.write(html_code)
 
 if __name__ == "__main__":
+    save_dashboard_html('static')
     save_municipality_maps(os.path.join('static', 'maps'))
-    env = Environment(loader=FileSystemLoader('templates'))
-    template = env.get_template('index.html')
-    html_code = template.render(provinces=mean_data(), timestamp=timestamp())
-    with open(os.path.join('static', 'index.html'), 'w') as f:
-        f.write(html_code)
