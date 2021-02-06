@@ -1,11 +1,9 @@
-from os.path import join
 import pandas as pd
-import numpy as np
 import os
 import math
 from datetime import datetime
-import requests
 import folium
+from jinja2 import Environment, FileSystemLoader
 
 def timestamp():
     with open(os.path.join('data', 'datetime.txt')) as f:
@@ -98,4 +96,8 @@ def generate_municipality_map(municipality_code):
     return m.get_root().render()
 
 if __name__ == "__main__":
-    pass
+    env = Environment(loader=FileSystemLoader('templates'))
+    template = env.get_template('index.html')
+    html_code = template.render(provinces=mean_data(), timestamp=timestamp())
+    with open(os.path.join('static', 'index.html'), 'w') as f:
+        f.write(html_code)
