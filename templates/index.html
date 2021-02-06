@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-        <link rel="stylesheet" href="{{ url_for('static',filename='style.css') }}">
+        <link rel="stylesheet" href="style.css">
         <title>Fijnstof Dashboard</title>
     </head>
     <body>
@@ -28,24 +28,26 @@
                     </div>
                 </p>
             </section>
-            <a href="/sensorkaart/{{ nearest_sensor.name }}">
-            <section class="nearest-sensor" style="background-color: {{ nearest_sensor.color }};">
-                <table>
-                    <tr><th colspan="2">Dichtsbijzijnde sensor: {{ nearest_sensor.name }}</th></tr>
-                    <tr><td class="label">Locatie</td><td class="observation">{{ nearest_sensor.municipality }}</td></tr>
-                    <tr><td class="label">PM2,5</td><td class="observation">{{ nearest_sensor.pm25_kal }} &mu;g/m3</td></tr>
-                    <tr><td class="label">PM10</td><td class="observation">{{ nearest_sensor.pm10_kal }} &mu;g/m3</td></tr>
-                    <tr><td class="label">Temperatuur</td><td class="observation">{{ nearest_sensor.temp }}&deg;C</td></tr>
-                    <tr><td class="label">Luchtvochtigheid</td><td class="observation">{{ nearest_sensor.rh }}%</td></tr>
-                </table>
-            </section>
-            </a>
             {% for province in provinces %}
             <section class="province">
                 <h2>{{ province.name }}</h2>
                 {% for mun in province.municipalities %}
-                <a href="/gemeentekaart/{{mun.code}}">
+                {% if mun.n_sensors == 0 %}
+                <a>
+                {% else %}
+                <a href="./maps/{{mun.code}}.html">
+                {% endif %}
                 <section class="municipality" style="background-color: {{ mun.color }};">
+                    {% if mun.n_sensors == 0 %}
+                    <table>
+                        <tr><th colspan="2">{{ mun.name }}</th></tr>
+                        <tr><td colspan="2"><br></td></tr>
+                        <tr><td colspan="2">Geen data beschikbaar</td></tr>
+                        <tr><td colspan="2"><br></td></tr>
+                        <tr><td colspan="2"><br></td></tr>
+                        <tr><td colspan="2"><br></td></tr>
+                    </table>
+                    {% else %}
                     <table>
                         <tr><th colspan="2">{{ mun.name }}</th></tr>
                         <tr><td class="label">PM2,5</td><td class="observation">{{ mun.pm25 }} &mu;g/m3</td></tr>
@@ -54,6 +56,7 @@
                         <tr><td class="label">Luchtvochtigheid</td><td class="observation">{{ mun.rh }}%</td></tr>
                         <tr><td class="label">Sensoren</td><td class="observation">{{ mun.n_sensors }}</td></tr>
                     </table>
+                    {% endif %}
                 </section>
                 </a>
                 {% endfor %}

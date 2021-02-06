@@ -1,11 +1,11 @@
-from os.path import join
 import pandas as pd
-import numpy as np
 import os
+import numpy as np
 import math
 from datetime import datetime
-import requests
 import folium
+from jinja2 import Environment, FileSystemLoader
+from progress.bar import IncrementalBar
 
 def timestamp():
     with open(os.path.join('data', 'datetime.txt')) as f:
@@ -14,16 +14,33 @@ def timestamp():
         encoded = datetime.strptime(stripped, '%Y-%m-%d %H:%M:%S')
         return encoded.strftime('%d-%m-%Y %H:%M')
 
-def mean_data(fix_eemsdelta=True):
-    # Map province codes to sensors
-    df = pd.read_csv(os.path.join('data', 'sensors.csv'))
+
+def get_municipalities(fix_eemsdelta=True):
     municipalities = pd.read_csv('gemeenten-alfabetisch-2021.csv')
 
     if fix_eemsdelta:
         eemsdelta_codes = [3, 24 ,10]
         municipalities = municipalities[~municipalities['Gemeentecode'].isin(eemsdelta_codes)]
 
-    mun_prov_map = pd.Series(municipalities.Provinciecode.values, index=municipalities.Gemeentecode).to_dict()
+    return municipalities
+
+
+def get_mun_prov_map(fix_eemsdelta=True):
+    municipalities = get_municipalities()
+    return pd.Series(municipalities.Provinciecode.values, index=municipalities.Gemeentecode).to_dict()
+
+
+def get_municipality_codes():
+    df = pd.read_csv(os.path.join('data', 'sensors.csv'))
+    return df['codegemeente'].unique()
+
+
+def mean_data(fix_eemsdelta=True):
+    # Map province codes to sensors
+    df = pd.read_csv(os.path.join('data', 'sensors.csv'))
+    municipalities = get_municipalities()
+    
+    mun_prov_map = get_mun_prov_map()
 
     df['codeprovincie'] = df['codegemeente'].map(mun_prov_map)
 
@@ -76,73 +93,39 @@ def mean_data(fix_eemsdelta=True):
     province_data = sorted(province_data, key=lambda k: k['name'])
     return province_data
 
-def distance(user_lat, user_lon, sensor_lat, sensor_lon):
-    return math.sqrt((user_lat - sensor_lat)**2 + (user_lon - sensor_lon)**2)
-
-def nearest_sensor_data(ip_address):
-    api_data = requests.get('https://ipapi.co/{}/json/'.format(ip_address))
-
-    try:
-        user_lat = api_data.json()['latitude']
-        user_lon = api_data.json()['longitude']
-    except KeyError:
-        return {'municipality': 'Geen','pm10_kal': '--', 'pm25_kal': '--', 'temp': '--', 'rh': '--', 'color': '#989898'}
-
-    sensor_data = pd.read_csv(os.path.join('data', 'sensors.csv'))
-
-    nearest_idx = 0
-
-    nearest_lat = np.inf
-    nearest_lon = np.inf
-
-    for i in range(len(sensor_data)):
-        sensor_lat = sensor_data['latitude'][i]
-        sensor_lon = sensor_data['longitude'][i]
-
-        if distance(user_lat, user_lon, sensor_lat, sensor_lon) < distance(user_lat, user_lon, nearest_lat, nearest_lon):
-            nearest_idx = i
-            nearest_lat = sensor_lat
-            nearest_lon = sensor_lon
-
-    nearest_sensor = sensor_data.iloc[nearest_idx].to_dict()
-
-    if nearest_sensor['pm10_kal'] >= 40 or nearest_sensor['pm25_kal'] >= 25:
-        nearest_sensor['color'] = '#FF4A5F' # Red
-    elif nearest_sensor['pm10_kal'] >= 20 or nearest_sensor['pm25_kal'] >= 10:
-        nearest_sensor['color'] = '#FFAB4A' # Orange
-    else:
-        nearest_sensor['color'] = '#0BB5FF' # Blue
-
-    for k in nearest_sensor.keys():
-        if type(nearest_sensor[k]) == np.float64 and math.isnan(nearest_sensor[k]):
-                        nearest_sensor[k] = '--'
-        elif k in ['pm10_kal', 'pm25_kal', 'rh']:
-            print(k, type(nearest_sensor[k]))
-            nearest_sensor[k] = round(float(nearest_sensor[k]))
-        elif k in ['temp']:
-            nearest_sensor[k] = round(float(nearest_sensor[k]), 1)
-
-    municipalities = pd.read_csv('gemeenten-alfabetisch-2021.csv')
-    mun_code_name_map = pd.Series(municipalities.Gemeentenaam.values, index=municipalities.Gemeentecode).to_dict()
-
-    nearest_sensor['municipality'] = mun_code_name_map[nearest_sensor['codegemeente']]
-
-    return nearest_sensor
-
 def generate_municipality_map(municipality_code):
     df = pd.read_csv(os.path.join('data', 'sensors.csv'))
     df = df[df['codegemeente'] == municipality_code]
 
-    locations = []
-    for _, row in df.iterrows():
-        l = (row['latitude'], row['longitude'])
-        locations.append(l)
-    
     m = folium.Map()
 
-    for l in locations:
-        marker = folium.Marker(l)
+    for _, row in df.iterrows():
+        l = (row['latitude'], row['longitude'])
+
+        if row['pm10_kal'] >= 40 or row['pm25_kal'] >= 25:
+            row['color'] = 'red' # Red
+        elif row['pm10_kal'] >= 20 or row['pm25_kal'] >= 10:
+            row['color'] = 'orange' # Orange
+        else:
+            row['color'] = 'lightblue' # Blue
+
+        for k in row.keys():
+            if type(row[k]) == float and math.isnan(row[k]):
+                            row[k] = '--'
+            elif k in ['pm10_kal', 'pm25_kal', 'rh']:
+                row[k] = round(float(row[k]))
+            elif k in ['temp']:
+                row[k] = round(float(row[k]), 1)
+        
+        text = '''PM2,5: {}&mu;g/m3<br>
+        PM10: {}&mu;g/m3<br>
+        Temperatuur: {}&deg;C<br>
+        Luchtvochtigheid: {}%'''.format(row['pm25_kal'], row['pm10_kal'], row['temp'], row['rh'], )
+        popup = folium.Popup(text, max_width=200)
+        icon = folium.Icon(color=row['color'])
+        marker = folium.Marker(l, popup=popup, icon=icon)
         marker.add_to(m)
+        
 
     sw = df[['latitude', 'longitude']].min().values.tolist()
     ne = df[['latitude', 'longitude']].max().values.tolist()
@@ -150,15 +133,25 @@ def generate_municipality_map(municipality_code):
     m.fit_bounds([sw, ne])
     return m.get_root().render()
 
-def generate_sensor_map(name):
-    df = pd.read_csv(os.path.join('data', 'sensors.csv'))
-    row = df.loc[df['name'] == name]
-    latitude = row['latitude']
-    longitude = row['longitude']
-    m = folium.Map((latitude, longitude), zoom_start=30)
-    marker = folium.Marker((latitude, longitude))
-    marker.add_to(m)
-    return m.get_root().render()
+def save_municipality_maps(path):
+    os.makedirs(path, exist_ok=True)
+    codes = get_municipality_codes()
+    progress_bar = IncrementalBar('Generating sensor maps %(index)d of %(max)d', max=len(codes), suffix='ETA: %(eta_td)s')
+    for c in codes:
+        mun_map = generate_municipality_map(c)
+        with open(os.path.join(path, str(c) + '.html'), 'w') as f:
+            f.write(mun_map)
+        progress_bar.next()
+    progress_bar.finish()
+
+def save_dashboard_html(path, filename='index.html', templates_path='templates', template_name='index.html'):
+    print('Generating {}'.format(filename))
+    env = Environment(loader=FileSystemLoader(templates_path))
+    template = env.get_template(template_name)
+    html_code = template.render(provinces=mean_data(), timestamp=timestamp())
+    with open(os.path.join(path, filename), 'w') as f:
+        f.write(html_code)
 
 if __name__ == "__main__":
-    pass
+    save_dashboard_html('static')
+    save_municipality_maps(os.path.join('static', 'maps'))

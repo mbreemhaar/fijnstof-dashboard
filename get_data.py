@@ -130,9 +130,9 @@ def write_timestamp(path, filename):
         f.write(current_date_and_time + '\n')
 
 
-if __name__ == '__main__':
+def get_data(output_path='data'):
     # Make an output folder called data if it does not exist yet
-    output_dir = make_output_dir('data')
+    output_dir = make_output_dir(output_path)
 
     # Provinces Groningen, Friesland and Drenthe
     municipality_code_list = get_province_municipality_codes([20,21,22])
