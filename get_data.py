@@ -130,7 +130,7 @@ def write_timestamp(path, filename):
         f.write(current_date_and_time + '\n')
 
 
-def get_data(output_path='data'):
+def get_data(output_path='data', archive=False):
     # Make an output folder called data if it does not exist yet
     output_dir = make_output_dir(output_path)
 
@@ -154,3 +154,11 @@ def get_data(output_path='data'):
     # Write data to CSV file
     df.to_csv(os.path.join(output_dir, 'sensors.csv'), index=False)
     write_timestamp(output_dir, 'datetime.txt')
+
+    if archive:
+        os.makedirs(os.path.join(output_dir, 'archive'), exist_ok=True)
+        current_date_and_time = str(datetime.datetime.now(pytz.timezone('Europe/Amsterdam')))
+        df.to_csv(os.path.join(output_dir, 'archive', str(current_date_and_time + '.csv')), index=False)
+
+if __name__ == '__main__':
+    get_data(archive=True)
