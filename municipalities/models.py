@@ -10,7 +10,7 @@ class Province(models.Model):
         return self.name
 
     class Meta:
-        ordering = ('name',)
+        ordering = ('code',)
         indexes = [
             models.Index(fields=('name',)),
             models.Index(fields=('code',)),
