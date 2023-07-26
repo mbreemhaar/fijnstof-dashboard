@@ -1,8 +1,5 @@
 from django.db import models
 
-# Create your models here.
-from django.db import models
-
 
 class Province(models.Model):
     """A province that has an official code and name, as specified by the Dutch Centraal Bureau voor de Statistiek."""
@@ -11,6 +8,9 @@ class Province(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        ordering = ('name',)
 
 
 class Municipality(models.Model):
@@ -23,6 +23,7 @@ class Municipality(models.Model):
     province = models.ForeignKey(Province, on_delete=models.PROTECT)
 
     class Meta:
+        ordering = ('province__name', 'name')
         indexes = [
             models.Index(fields=('name',)),
             models.Index(fields=('province',))
