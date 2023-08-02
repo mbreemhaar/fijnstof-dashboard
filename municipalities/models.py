@@ -11,6 +11,7 @@ class Province(models.Model):
     """A province that has an official code and name, as specified by the Dutch Centraal Bureau voor de Statistiek."""
     code = models.PositiveSmallIntegerField(unique=True)
     name = models.CharField(max_length=255)
+    active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name

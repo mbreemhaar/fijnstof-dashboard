@@ -11,7 +11,7 @@ class IndexView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        provinces = Province.objects.prefetch_related('municipality_set').all()
+        provinces = Province.objects.filter(active=True).prefetch_related('municipality_set').all()
 
         observations = Observation.objects.filter(
             sensor__municipality__province__in=provinces,

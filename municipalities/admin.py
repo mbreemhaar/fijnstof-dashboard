@@ -5,7 +5,8 @@ from municipalities import models
 
 @admin.register(models.Province)
 class ProvinceAdmin(admin.ModelAdmin):
-    list_display = ('name', 'code')
+    list_filter = ('active',)
+    list_display = ('name', 'code', 'active')
     search_fields = ('name', 'code')
 
 
