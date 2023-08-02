@@ -13,6 +13,7 @@ TYPE_MAP = {
     'humidity': 'rh',
 }
 
+
 def get_data():
     response = requests.get('https://data.sensor.community/static/v2/data.json')
     response_data = response.json()
