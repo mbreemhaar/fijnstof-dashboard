@@ -27,7 +27,7 @@ class Municipality(models.Model):
     province = models.ForeignKey(Province, on_delete=models.PROTECT)
 
     class Meta:
-        ordering = ('province__name', 'name')
+        ordering = ('province__code', 'name')
         indexes = [
             models.Index(fields=('name',)),
             models.Index(fields=('code',)),
