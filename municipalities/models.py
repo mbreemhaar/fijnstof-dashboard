@@ -1,4 +1,9 @@
+from typing import Optional
+
 from django.db import models
+from geopy import Nominatim, Location
+
+_geolocator = Nominatim(user_agent='com.marcobreemhaar.fijnstof')
 
 
 class Province(models.Model):
@@ -35,6 +40,18 @@ class Municipality(models.Model):
         ]
 
         verbose_name_plural = 'municipalities'
+
+    @staticmethod
+    def from_coordinates(latitude, longitude):
+        location: Optional[Location] = _geolocator.reverse(f'{latitude},{longitude}')
+        if location is not None:
+            municipality_name = location.raw['address']['municipality']
+            try:
+                return Municipality.objects.get(name=municipality_name)
+            except Municipality.DoesNotExist:
+                return None
+        else:
+            return None
 
     def __str__(self):
         return self.name
