@@ -10,7 +10,12 @@ class Sensor(models.Model):
     latitude = models.DecimalField(max_digits=6, decimal_places=3)
     longitude = models.DecimalField(max_digits=6, decimal_places=3)
 
-    municipality = models.ForeignKey(Municipality, on_delete=models.CASCADE, null=True, blank=True)
+    municipality = models.ForeignKey(
+        Municipality,
+        on_delete=models.CASCADE,
+        null=True, blank=True,
+        related_name='sensors'
+    )
 
     def __str__(self):
         return str(self.sensor_community_id)

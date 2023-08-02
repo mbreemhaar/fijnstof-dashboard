@@ -22,6 +22,7 @@ def get_data():
     add_sensors(country_filtered_data)
     add_observations(country_filtered_data)
     delete_old_observations()
+    delete_old_sensors()
 
 
 def add_sensors(data):
@@ -50,6 +51,12 @@ def add_observations(data):
             if value > 999:
                 continue
 
+            if observation_type == 'temp' and (value < -60 or value > 60):
+                continue
+
+            if observation_type == 'rh' and (value < 0 or value > 100):
+                continue
+
             observations.append(
                 Observation(
                     timestamp=timestamp,
@@ -64,6 +71,10 @@ def add_observations(data):
 
 def delete_old_observations(delta=timedelta(minutes=5)):
     Observation.objects.filter(timestamp__lt=now()-delta).delete()
+
+
+def delete_old_sensors():
+    Sensor.objects.filter(observation__isnull=True).delete()
 
 
 def filter_country(data, country_code='NL'):
