@@ -1,6 +1,7 @@
 from functools import lru_cache
 from typing import Optional
 
+from geopy import Nominatim
 from django.db import models
 
 _geolocator = Nominatim(user_agent='com.marcobreemhaar.fijnstof')
