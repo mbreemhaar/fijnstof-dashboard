@@ -1,3 +1,6 @@
+from functools import lru_cache
+from typing import Optional
+
 from django.db import models
 
 
@@ -35,6 +38,22 @@ class Municipality(models.Model):
         ]
 
         verbose_name_plural = 'municipalities'
+
+    @staticmethod
+    @lru_cache
+    def from_coordinates(latitude, longitude):
+        location: Optional[Location] = _geolocator.reverse(f'{latitude},{longitude}')
+        if location is not None:
+            try:
+                municipality_name = location.raw['address'].get('municipality')
+            except KeyError as e:
+                raise Exception(f'No valid location found for ({latitude}, {longitude})') from e
+            try:
+                return Municipality.objects.get(name=municipality_name)
+            except Municipality.DoesNotExist:
+                return None
+        else:
+            return None
 
     def __str__(self):
         return self.name
