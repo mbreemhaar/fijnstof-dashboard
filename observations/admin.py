@@ -1,9 +1,8 @@
 from django.contrib import admin
 
-from observations.models import Sensor
+from observations.models import Sensor, Observation
 
 
-# Register your models here.
 @admin.register(Sensor)
 class SensorAdmin(admin.ModelAdmin):
     list_display = [
@@ -11,4 +10,14 @@ class SensorAdmin(admin.ModelAdmin):
         'latitude',
         'longitude',
         'municipality',
+    ]
+
+
+@admin.register(Observation)
+class ObservationAdmin(admin.ModelAdmin):
+    list_display = [
+        'timestamp',
+        'sensor',
+        'value',
+        'type',
     ]

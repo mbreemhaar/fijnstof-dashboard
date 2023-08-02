@@ -1,7 +1,7 @@
+from functools import lru_cache
 from typing import Optional
 
 from django.db import models
-from geopy import Nominatim, Location
 
 _geolocator = Nominatim(user_agent='com.marcobreemhaar.fijnstof')
 
@@ -42,10 +42,14 @@ class Municipality(models.Model):
         verbose_name_plural = 'municipalities'
 
     @staticmethod
+    @lru_cache
     def from_coordinates(latitude, longitude):
         location: Optional[Location] = _geolocator.reverse(f'{latitude},{longitude}')
         if location is not None:
-            municipality_name = location.raw['address']['municipality']
+            try:
+                municipality_name = location.raw['address'].get('municipality')
+            except KeyError as e:
+                raise Exception(f'No valid location found for ({latitude}, {longitude})') from e
             try:
                 return Municipality.objects.get(name=municipality_name)
             except Municipality.DoesNotExist:
