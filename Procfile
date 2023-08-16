@@ -1,1 +1,1 @@
-web: python manage.py collectstatic --noinput && gunicorn fijnstof.wsgi
+web: python manage.py collectstatic && python manage.py migrate --noinput && gunicorn fijnstof.wsgi
