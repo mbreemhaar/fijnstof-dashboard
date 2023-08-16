@@ -15,14 +15,26 @@ TYPE_MAP = {
 
 
 def get_data():
+    print('Retrieving data from Sensor Community API...')
     response = requests.get('https://data.sensor.community/static/v2/data.json')
     response_data = response.json()
 
+    print('Filtering out all data from non-Dutch sensors...')
     country_filtered_data = filter_country(response_data, country_code='NL')
+
+    print('Adding new sensors to database...')
     add_sensors(country_filtered_data)
+
+    print('Writing observations to database...')
     add_observations(country_filtered_data)
+
+    print('Removing old observations from database...')
     delete_old_observations()
+
+    print('Removing unused sensors from database...')
     delete_old_sensors()
+
+    print('Done!')
 
 
 def add_sensors(data):
