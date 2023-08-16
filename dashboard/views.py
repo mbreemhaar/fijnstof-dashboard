@@ -50,5 +50,7 @@ class IndexView(TemplateView):
 
         context['provinces'] = provinces
         context['now'] = now()
-        context['latest_data_timestamp'] = Observation.objects.order_by('-timestamp').values('timestamp').first()['timestamp']
+
+        latest_observation = Observation.objects.order_by('-timestamp').values('timestamp').first()
+        context['latest_data_timestamp'] = latest_observation['timestamp'] if latest_observation else None
         return context
