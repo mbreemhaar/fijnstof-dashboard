@@ -78,7 +78,7 @@ def add_observations(data):
     Observation.objects.bulk_create(observations)
 
 
-def delete_old_observations(delta=timedelta(minutes=60)):
+def delete_old_observations(delta=timedelta(minutes=15)):
     Observation.objects.filter(timestamp__lt=now()-delta).delete()
 
 
