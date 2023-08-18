@@ -31,7 +31,7 @@ DEBUG = os.environ.get('DEBUG', default=False)
 ALLOWED_HOSTS = ['*']
 INTERNAL_IPS = ['127.0.0.1']
 
-CORS_ALLOWED_ORIGINS = ['https://fijnstof.marcobreemhaar.com/']
+CSRF_TRUSTED_ORIGINS = ['https://fijnstof.marcobreemhaar.com']
 
 
 # Application definition
