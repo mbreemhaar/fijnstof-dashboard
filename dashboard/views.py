@@ -3,7 +3,7 @@ from django.utils.timezone import now
 from django.views.generic import TemplateView
 
 from municipalities.models import Province
-from observations.models import Observation
+from observations.models import Observation, Sensor
 
 
 class IndexView(TemplateView):
@@ -46,6 +46,7 @@ class IndexView(TemplateView):
                     'pm25': averages_dict.get(province.id, {}).get(municipality.id, {}).get('pm25', None),
                     'temp': averages_dict.get(province.id, {}).get(municipality.id, {}).get('temp', None),
                     'rh': averages_dict.get(province.id, {}).get(municipality.id, {}).get('rh', None),
+                    'sensor_count': Sensor.objects.filter(municipality=municipality, observation__isnull=False).distinct().count()
                 }
 
         context['provinces'] = provinces
