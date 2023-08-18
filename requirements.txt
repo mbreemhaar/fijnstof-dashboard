@@ -9,7 +9,7 @@ geopy==2.3.0
 gunicorn==21.2.0
 idna==3.4
 packaging==23.1
-psycopg-binary==3.1.10
+psycopg2-binary==2.9.7
 pytz==2023.3
 requests==2.31.0
 sqlparse==0.4.4
