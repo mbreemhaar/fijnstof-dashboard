@@ -5,8 +5,22 @@
         <div>
             <h1>Fijnstof Dashboard Nederland</h1>
             <p>
-                Welkom op het fijnstof dashboard van Nederland! Laatste data: {{ latest_data_timestamp }}
+                Welkom op het fijnstof dashboard van Noord-Nederland! Laatste data: {{ latest_data_timestamp }}
             </p>
+        </div>
+        <div class="row justify-content-center row-cols-auto">
+            <div class="col my-2">
+                <i class="bi-square-fill text-success"></i> Goed
+            </div>
+            <div class="col my-2">
+                <i class="bi-square-fill text-warning"></i> Matig (nadert Europese norm)
+            </div>
+            <div class="col my-2">
+                <i class="bi-square-fill text-danger"></i> Slecht (boven Europese norm)
+            </div>
+            <div class="col my-2">
+                <i class="bi-square-fill text-secondary"></i> Geen data bekend
+            </div>
         </div>
     </section>
 
