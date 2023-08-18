@@ -31,9 +31,6 @@ def get_data():
     print('Removing old observations from database...')
     delete_old_observations()
 
-    print('Removing unused sensors from database...')
-    delete_old_sensors()
-
     print('Done!')
 
 
