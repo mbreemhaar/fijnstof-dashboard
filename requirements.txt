@@ -1,6 +1,7 @@
 asgiref==3.7.2
 certifi==2023.7.22
 charset-normalizer==3.2.0
+dj-database-url==2.1.0
 Django==4.2.3
 django-debug-toolbar==4.1.0
 geographiclib==2.0
@@ -8,8 +9,10 @@ geopy==2.3.0
 gunicorn==21.2.0
 idna==3.4
 packaging==23.1
+psycopg==3.1.10
 pytz==2023.3
 requests==2.31.0
 sqlparse==0.4.4
+typing_extensions==4.7.1
 urllib3==2.0.4
 whitenoise==6.5.0
