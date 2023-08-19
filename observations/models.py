@@ -1,10 +1,11 @@
 from django.db import models
 from django.utils.translation import gettext as _
+from django_admin_geomap import GeoItem
 
 from municipalities.models import Municipality
 
 
-class Sensor(models.Model):
+class Sensor(models.Model, GeoItem):
     sensor_community_id = models.IntegerField(unique=True)
 
     latitude = models.DecimalField(max_digits=6, decimal_places=3)
@@ -16,6 +17,14 @@ class Sensor(models.Model):
         null=True, blank=True,
         related_name='sensors'
     )
+
+    @property
+    def geomap_longitude(self):
+        return '' if self.longitude is None else str(self.longitude)
+
+    @property
+    def geomap_latitude(self):
+        return '' if self.latitude is None else str(self.latitude)
 
     def __str__(self):
         return str(self.sensor_community_id)
