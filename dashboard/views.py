@@ -55,3 +55,7 @@ class IndexView(TemplateView):
         latest_observation = Observation.objects.order_by('-timestamp').values('timestamp').first()
         context['latest_data_timestamp'] = latest_observation['timestamp'] if latest_observation else None
         return context
+
+
+def trigger_error(request):
+    division_by_zero = 1/0
