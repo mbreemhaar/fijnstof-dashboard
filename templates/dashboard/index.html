@@ -5,7 +5,8 @@
         <div>
             <h1>Fijnstof Dashboard Noord-Nederland</h1>
             <p>
-                Welkom op het fijnstof dashboard van Noord-Nederland! Laatste data: {{ latest_data_timestamp }}
+                Welkom op het fijnstof dashboard van Noord-Nederland!
+                Laatste data: {{ latest_data_timestamp|date:"d-m-Y H:i" }}
             </p>
         </div>
         <div class="row justify-content-center row-cols-auto">
