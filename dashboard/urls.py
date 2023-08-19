@@ -4,5 +4,4 @@ from dashboard.views import IndexView, trigger_error
 
 urlpatterns = [
     path('', IndexView.as_view(), name='index'),
-    path('sentry-debug/', trigger_error),
 ]
