@@ -49,7 +49,10 @@ class Municipality(models.Model):
         location: Optional[Location] = _geolocator.reverse(f'{latitude},{longitude}')
         if location is not None:
             try:
-                municipality_name = location.raw['address'].get('municipality')
+                for field_name in ['municipality', 'city', 'town', 'village']:
+                    municipality_name = location.raw['address'].get(field_name)
+                    if municipality_name is not None:
+                        break
             except KeyError as e:
                 raise Exception(f'No valid location found for ({latitude}, {longitude})') from e
             try:

@@ -13,6 +13,10 @@ class SensorAdmin(django_admin_geomap.ModelAdmin):
         'municipality',
     ]
 
+    list_filter = [
+        'municipality'
+    ]
+
     search_fields = [
         'sensor_community_id',
         'municipality__name'
