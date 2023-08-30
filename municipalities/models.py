@@ -1,10 +1,13 @@
 from functools import lru_cache
 from typing import Optional
 
-from geopy import Nominatim
+from geopy import Nominatim, Location
 from django.db import models
+from geopy.exc import GeocoderUnavailable
 
-_geolocator = Nominatim(user_agent='com.marcobreemhaar.fijnstof')
+from fijnstof.settings import NOMINATIM_USER_AGENT
+
+_geolocator = Nominatim(user_agent=NOMINATIM_USER_AGENT)
 
 
 class Province(models.Model):
@@ -46,7 +49,11 @@ class Municipality(models.Model):
     @staticmethod
     @lru_cache
     def from_coordinates(latitude, longitude):
-        location: Optional[Location] = _geolocator.reverse(f'{latitude},{longitude}')
+        try:
+            location: Optional[Location] = _geolocator.reverse(f'{latitude},{longitude}')
+        except GeocoderUnavailable:
+            location = None
+
         if location is not None:
             try:
                 for field_name in ['municipality', 'city', 'town', 'village']:

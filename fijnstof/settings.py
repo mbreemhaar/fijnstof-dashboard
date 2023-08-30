@@ -152,6 +152,8 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+NOMINATIM_USER_AGENT = os.environ.get('NOMINATIM_USER_AGENT', default='com.marcobreemhaar.fijnstof')
+
 SENTRY_DSN = os.environ.get('SENTRY_DSN')
 
 sentry_sdk.init(
