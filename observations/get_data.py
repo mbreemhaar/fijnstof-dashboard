@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 import requests
+from django.utils import timezone
 from django.utils.timezone import make_aware, now
 
 from observations.models import Sensor, Observation
@@ -47,7 +48,7 @@ def add_sensors(data):
 def add_observations(data):
     observations = []
     for row in data:
-        timestamp = make_aware(datetime.strptime(row['timestamp'], '%Y-%m-%d %H:%M:%S'))
+        timestamp = make_aware(datetime.strptime(row['timestamp'], '%Y-%m-%d %H:%M:%S'), timezone=timezone.utc)
 
         for observation_data in row['sensordatavalues']:
             observation_type = TYPE_MAP.get(observation_data['value_type'])
